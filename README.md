@@ -12,7 +12,7 @@ to get started.
 Once Helm has been set up correctly, add the repo as follows:
 
 ```bash
-helm repo add pseudomuto https://pseudomuto.github.io/charts
+helm repo add pseudomuto https://pseudomuto.com/charts
 ```
 
 If you had already added this repo earlier, run `helm repo update` to retrieve

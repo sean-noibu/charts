@@ -2,7 +2,7 @@
 
 A chart for installing Briefer and all of it's components.
 
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![AppVersion: 0.0.26](https://img.shields.io/badge/AppVersion-0.0.26-informational?style=flat-square)
+![Version: 0.1.1](https://img.shields.io/badge/Version-0.1.1-informational?style=flat-square) ![AppVersion: 0.0.26](https://img.shields.io/badge/AppVersion-0.0.26-informational?style=flat-square)
 
 This repository contains a Helm chart which can be used to deploy [Briefer] to your Kubernetes cluster.
 
@@ -76,7 +76,7 @@ For now, this chart isn't published in any repos. You'll need to clone this repo
 To install the chart with the release name `briefer`:
 
 ```bash
-helm repo add pseudomuto https://pseudomuto.github.io/charts # if necessary
+helm repo add pseudomuto https://pseudomuto.com/charts # if necessary
 helm repo update pseudomuto # fetch the latest versions
 helm install briefer pseudomuto/briefer -f <your_values_file> [--set <key>=<value>,...]
 ```
