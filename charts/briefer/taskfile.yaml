@@ -1,0 +1,17 @@
+version: "3"
+
+tasks:
+  preinstall:
+    cmd: |
+      kubectl get ns | grep briefer >/dev/null || kubectl create ns briefer
+      kubectl get secret | grep briefer >/dev/null || kubectl create secret generic briefer -n briefer \
+        --from-literal=AI_PASSWORD="$(openssl rand -hex 12)" \
+        --from-literal=AUTH_JWT_SECRET="$(openssl rand -hex 24)" \
+        --from-literal=DATASOURCES_ENCRYPTION_KEY="$(openssl rand -hex 32)" \
+        --from-literal=ENVIRONMENT_VARIABLES_ENCRYPTION_KEY="$(openssl rand -hex 32)" \
+        --from-literal=JUPYTER_TOKEN="$(openssl rand -hex 24)" \
+        --from-literal=LOGIN_JWT_SECRET="$(openssl rand -hex 24)" \
+        --from-literal=OPENAI_API_KEY="sk-placeholder" \
+        --from-literal=POSTGRES_PASSWORD="testPassword" \
+        --from-literal=POSTGRES_PRISMA_URL="postgresql://briefer:testPassword@briefer-postgres:5432/briefer?schema=public" \
+        --from-literal=WORKSPACE_SECRETS_ENCRYPTION_KEY="$(openssl rand -hex 32)"

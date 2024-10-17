@@ -1,0 +1,95 @@
+version: "3"
+
+
+vars:
+  ARCH:
+    sh: uname -m | tr A-Z a-z
+  OS:
+    sh: uname -s | tr A-Z a-z
+  HELM_DOCS_VERSION: 1.14.2
+  HELM_VERSION: 3.12.2
+  K3D_VERSION: 5.7.4
+
+tasks:
+  cluster:up:
+    desc: Stand up the local k3d cluster
+    deps: [bin:k3d]
+    silent: true
+    status:
+      - bin/k3d cluster get charts >/dev/null
+    cmd: KUBECONFIG=~/.kube/config bin/k3d cluster create --config k3d.yaml
+
+  cluster:down:
+    desc: Shut dow the local k3d cluster
+    silent: true
+    deps: [bin:k3d]
+    cmd: KUBECONFIG=~/.kube/config bin/k3d cluster delete --config k3d.yaml
+
+  docs:
+    desc: Generate README'd based on the commented values files
+    deps: [bin:helm-docs]
+    cmd: bin/helm-docs .
+
+  # E.g. bin/task install-briefer -- -f testdata/briefer-sample.yaml
+  install-*:
+    desc: Print out the generated YAML for the chart (replace * with dir name under charts/)
+    deps: [bin:helm, cluster:up]
+    vars:
+      CHART: "{{index .MATCH 0}}"
+    cmds:
+      - bin/task -t charts/{{.CHART}}/taskfile.yaml preinstall
+      - bin/helm upgrade {{.CHART}} --install charts/{{.CHART}} -n {{.CHART}} --create-namespace {{.CLI_ARGS}}
+
+  # E.g. bin/task template-briefer -- -f testdata/briefer-sample.yaml
+  template-*:
+    desc: Print out the generated YAML for the chart (replace * with dir name under charts/)
+    deps: [bin:helm]
+    vars:
+      CHART: "{{index .MATCH 0}}"
+    cmd: bin/helm template {{.CHART}} charts/{{.CHART}} {{.CLI_ARGS}}
+
+  ################################################################################
+  # Binaries
+  ################################################################################
+  bin:helm:
+    desc: Install helm binary
+    internal: true
+    silent: true
+    status:
+      - test -f bin/helm
+      - bin/helm version | grep v{{.HELM_VERSION}} >/dev/null
+    cmds:
+      - defer: rm -rf bin/helm_tmp
+      - echo Installing helm to bin/helm...
+      - mkdir -p bin/helm_tmp
+      - curl -fsSL -o bin/helm_tmp/helm.tar.gz https://get.helm.sh/helm-v{{.HELM_VERSION}}-{{.OS}}-{{.ARCH}}.tar.gz
+      - tar -xzf bin/helm_tmp/helm.tar.gz -C bin/helm_tmp
+      - mv bin/helm_tmp/{{.OS}}-{{.ARCH}}/helm bin/
+
+  bin:k3d:
+    desc: Install k3d binary
+    internal: true
+    silent: true
+    status:
+      - test -f bin/k3d
+      - bin/k3d --version | grep v{{.K3D_VERSION}} >/dev/null
+    cmds:
+      - echo Installing k3d to bin/k3d...
+      - mkdir -p bin/
+      - curl -fsSL -o bin/k3d https://github.com/k3d-io/k3d/releases/download/v{{.K3D_VERSION}}/k3d-{{.OS}}-{{.ARCH}}
+      - chmod +x bin/k3d
+
+  bin:helm-docs:
+    desc: Install helm-docs binary in the bin directory
+    internal: true
+    silent: true
+    status:
+      - test -f bin/helm-docs
+      - bin/helm-docs --version | grep v{{.HELM_DOCS_VERSION}} >/dev/null
+    cmds:
+      - defer: rm -rf bin/helm-docs-temp
+      - mkdir -p bin/helm-docs-temp
+      - echo Installing helm-docs to bin/helm-docs
+      - curl -fsSL -o bin/helm-docs-temp/docs.tar.gz https://github.com/norwoodj/helm-docs/releases/download/v{{.HELM_DOCS_VERSION}}/helm-docs_{{.HELM_DOCS_VERSION}}_{{.OS}}_{{.ARCH}}.tar.gz
+      - tar -xzf bin/helm-docs-temp/docs.tar.gz -C bin/helm-docs-temp
+      - mv bin/helm-docs-temp/helm-docs bin/
