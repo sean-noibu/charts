@@ -3,5 +3,5 @@ name: briefer
 home: https://github.com/briefercloud/briefer/tree/main/helm
 description: A chart for installing Briefer and all of it's components.
 
-version: 0.1.1
+version: 0.1.2
 appVersion: 0.0.26

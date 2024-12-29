@@ -57,6 +57,9 @@ spec:
           resources:
             {{- toYaml . | nindent 12 }}
           {{ end }}
+          volumeMounts:
+            - name: {{ include "helm.name" . }}-jupyter
+              mountPath: /home/jupyteruser
           livenessProbe:
             httpGet:
               path: /api
