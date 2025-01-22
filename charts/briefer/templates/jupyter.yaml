@@ -36,6 +36,17 @@ spec:
         role: jupyter
     spec:
       serviceAccount: {{ include "helm.serviceAccountName" . }}
+      initContainers:
+        - name: permissions
+          image: briefercloud/briefer-jupyter:v{{ default .Chart.AppVersion .Values.jupyter.version }}
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - mkdir -p /data/.local/share/jupyter/runtime && chown -R jupyteruser:$(id -g) /data && chmod -R 775 /data
+          volumeMounts:
+            - name: {{ include "helm.name" . }}-jupyter
+              mountPath: /data
       containers:
         - name: jupyter
           image: briefercloud/briefer-jupyter:v{{ default .Chart.AppVersion .Values.jupyter.version }}
